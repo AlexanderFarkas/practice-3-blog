@@ -2,12 +2,15 @@ import {useEffect, useState} from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+import {trpc} from "./trpcClient.ts";
 
 function App() {
   const [count, setCount] = useState(0)
 
   useEffect(() => {
-
+    trpc.userList.query().then((users) => {
+      console.log(users);
+    });
   }, []);
   return (
     <>
