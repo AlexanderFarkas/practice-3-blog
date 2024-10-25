@@ -24,7 +24,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/AccessTokenDTO"
+                }
               }
             }
           },
@@ -60,7 +62,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/AccessTokenDTO"
+                }
               }
             }
           },
@@ -80,6 +84,19 @@
   },
   "components": {
     "schemas": {
+      "AccessTokenDTO": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "token"
+        ],
+        "title": "AccessTokenDTO"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -95,9 +112,9 @@
       },
       "LoginUserDTO": {
         "properties": {
-          "email": {
+          "username": {
             "type": "string",
-            "title": "Email"
+            "title": "Username"
           },
           "password": {
             "type": "string",
@@ -108,7 +125,7 @@
         },
         "type": "object",
         "required": [
-          "email",
+          "username",
           "password"
         ],
         "title": "LoginUserDTO"
