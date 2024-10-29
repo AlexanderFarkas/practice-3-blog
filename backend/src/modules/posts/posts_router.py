@@ -7,11 +7,11 @@ from sqlalchemy.orm import Session
 import sqlalchemy as sa
 from backend.src.modules.auth.auth_dependencies import get_user_id
 from backend.src.modules.auth.auth_models import User, user_subscription_table
-from backend.src.modules.auth.auth_router import UserDTO
 from backend.src.modules.common.dto import DTO
 from backend.src.modules.common.exceptions import DomainException
 from backend.src.modules.database.db import get_session
 from backend.src.modules.posts.posts_models import Post, shared_posts_table
+from backend.src.modules.users.users_router import UserDTO
 
 posts_router = APIRouter(
     dependencies=[Depends(get_user_id)],
@@ -24,6 +24,12 @@ class PutPostDTO(DTO):
     is_public: bool
 
 
+class CommentDTO(DTO):
+    user: UserDTO
+    content: str
+    created_at: datetime.date
+
+
 class PostDTO(DTO):
     title: str
     content: str
@@ -31,25 +37,52 @@ class PostDTO(DTO):
     user: UserDTO
     created_at: datetime.date
     updated_at: datetime.date
+    comments: list[CommentDTO]
 
 
-@posts_router.get("/feed")
+@posts_router.get("/all_feed")
 def get_feed(
     user_id: uuid.UUID = Depends(get_user_id),
     session: Session = Depends(get_session),
-):
+) -> list[PostDTO]:
+    posts = (
+        session.execute(
+            select(Post)
+            .outerjoin(shared_posts_table, shared_posts_table.c.post_id == Post.id)
+            .where(
+                sa.or_(
+                    Post.is_public,
+                    shared_posts_table.c.user_id == user_id,
+                ),
+            )
+            .order_by(Post.created_at.desc())
+        )
+        .scalars()
+        .all()
+    )
+    return [PostDTO.model_validate(post) for post in posts]
+
+
+@posts_router.get("/subscriptions_feed")
+def get_subscriptions_feed(
+    user_id: uuid.UUID = Depends(get_user_id),
+    session: Session = Depends(get_session),
+) -> list[PostDTO]:
     posts = (
         session.execute(
             select(Post)
             .select_from(user_subscription_table)
-            .outerjoin(shared_posts_table, shared_posts_table.c.post_id == Post.id)
+            .join(Post, Post.user_id == user_subscription_table.c.publisher_id)
+            .outerjoin(shared_posts_table, shared_posts_table.c.user_id == Post.id)
             .where(
+                user_subscription_table.c.subscriber_id == user_id,
                 Post.user_id == user_subscription_table.c.publisher_id,
                 sa.or_(
                     Post.is_public,
                     shared_posts_table.c.user_id == user_id,
                 ),
             )
+            .order_by(Post.created_at.desc())
         )
         .scalars()
         .all()
@@ -62,7 +95,7 @@ def get_user_posts(
     publisher_id: uuid.UUID,
     user_id: uuid.UUID = Depends(get_user_id),
     session: Session = Depends(get_session),
-):
+) -> list[PostDTO]:
     posts = (
         session.execute(
             select(Post)

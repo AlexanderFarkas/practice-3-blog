@@ -3,6 +3,7 @@ from datetime import timedelta
 
 import jwt
 from argon2 import PasswordHasher
+from argon2.exceptions import VerificationError
 from sqlalchemy import ForeignKey, Column
 from sqlalchemy.orm import Mapped, relationship
 from sqlalchemy.testing.schema import mapped_column, Table
@@ -57,13 +58,16 @@ class User(Base):
     def create_from(cls, username: str, password: str):
         encoded_password = password_hasher.hash(password)
         return cls(
-            email=username,
+            username=username,
             password=encoded_password,
+            subscribers=[],
+            subscriptions=[],
         )
 
     def login(self, password: str) -> "AccessTokenDTO":
-        is_password_correct = password_hasher.verify(self.password, password)
-        if not is_password_correct:
+        try:
+            password_hasher.verify(self.password, password)
+        except VerificationError:
             raise DomainException("Password is incorrect")
 
         return AccessTokenDTO(token=self._generate_access_token())
@@ -71,7 +75,7 @@ class User(Base):
     def _generate_access_token(self):
         issued_at = utc_now()
         data = {
-            "user_id": self.id,
+            "user_id": str(self.id),
             "exp": issued_at + timedelta(hours=2),
             "iat": issued_at,
         }

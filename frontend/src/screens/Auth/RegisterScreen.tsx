@@ -1,10 +1,83 @@
 import { Link } from "wouter";
+import { PageRoot } from "@/screens/PageRoot.tsx";
+import { TypographyH2 } from "@/components/typography.tsx";
+import { Label } from "@/components/ui/label.tsx";
+import { Input } from "@/components/ui/input.tsx";
+import { Button, buttonVariants } from "@/components/ui/button.tsx";
 
-export const RegisterScreen = () => {
+import React from "react";
+import { observer } from "mobx-react-lite";
+import {
+  RegisterScreenVmProvider,
+  useRegisterScreenVm,
+} from "./RegisterScreenVm";
+import { cn } from "@/lib/utils.ts";
+
+interface IProps {}
+
+export const RegisterScreen: React.FC<IProps> = observer((props) => {
   return (
-    <div>
-      <h1>Register</h1>
-      <Link to={"/login"}>Login instead</Link>
-    </div>
+    <RegisterScreenVmProvider>
+      <RegisterScreenImpl {...props} />
+    </RegisterScreenVmProvider>
   );
-};
+});
+
+const RegisterScreenImpl: React.FC<IProps> = observer((props) => {
+  const vm = useRegisterScreenVm();
+  return (
+    <PageRoot
+      className={cn(
+        "items-stretch justify-center",
+        vm.isLoading && "pointer-events-none opacity-70",
+      )}
+    >
+      <TypographyH2 className={"mb-3"}>Register</TypographyH2>
+      <div className={"flex flex-col gap-2"}>
+        <Label htmlFor={"username-field"}>Username</Label>
+        <Input
+          type={"email"}
+          value={vm.username}
+          onChange={(e) => (vm.username = e.target.value)}
+          id={"username-field"}
+          placeholder={"Enter your username"}
+        />
+      </div>
+      <div className={"flex flex-col gap-2"}>
+        <Label htmlFor={"password-field"}>Password</Label>
+        <Input
+          id={"password-field"}
+          value={vm.password}
+          onChange={(e) => (vm.password = e.target.value)}
+          type={"password"}
+          placeholder={"Enter your password"}
+        />
+      </div>
+      <div className={"flex flex-col gap-2"}>
+        <Label htmlFor={"repeat-password-field"}>Confirm Password</Label>
+        <Input
+          id={"repeat-password-field"}
+          value={vm.repeatPassword}
+          onChange={(e) => (vm.repeatPassword = e.target.value)}
+          autoComplete={"off"}
+          type={"password"}
+          placeholder={"Confirm your password"}
+        />
+      </div>
+      {vm.error != null && <Label className={"text-red-400"}>{vm.error}</Label>}
+      <div className={"flex flex-col mt-4 gap-2"}>
+        <Button
+          disabled={vm.error != null}
+          className={"bg-amber-300"}
+          onClick={vm.submit}
+          type={"submit"}
+        >
+          Register
+        </Button>
+        <Link className={buttonVariants({ variant: "outline" })} to={"/login"}>
+          Login instead
+        </Link>
+      </div>
+    </PageRoot>
+  );
+});

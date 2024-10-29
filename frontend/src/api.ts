@@ -1,15 +1,12 @@
-import createClient from "openapi-fetch";
+import createFetchClient from "openapi-fetch";
 import { paths } from "./gen/schema";
 
-const api = createClient<paths>({
-  fetch: async (...params) => {
-    try {
-      return await fetch(...params);
-    } catch (error) {
-      throw new NetworkError(error);
-    }
-  },
-});
+const api = {
+  onUnauthorized: () => {},
+  ...createFetchClient<paths>({
+    baseUrl: "http://localhost:8000",
+  }),
+};
 
 export class ApiError extends Error {
   constructor(
@@ -34,12 +31,20 @@ export class UnauthorizedError extends ApiError {
 
 api.use({
   async onRequest({ request }) {
-    request.headers.set("Authorization", "Bearer token");
+    request.headers.set(
+      "Authorization",
+      "Bearer " + localStorage.getItem("accessToken"),
+    );
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   },
   async onResponse({ response }) {
     if (!response.ok) {
       if (response.status === 401) {
+        api.onUnauthorized();
         throw new UnauthorizedError();
+      } else if (response.status >= 400 && response.status < 500) {
+        const error = await response.clone().json();
+        throw new ApiError(error["detail"], response.status);
       } else {
         throw new ApiError(response.statusText, response.status);
       }
