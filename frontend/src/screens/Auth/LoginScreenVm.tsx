@@ -8,8 +8,8 @@ import {
 } from "mobx";
 import { useVm } from "@/lib/utils.ts";
 import { AuthStore } from "@/screens/Stores/AuthStore.ts";
-import { useStores } from "@/main.tsx";
 import { ApiError } from "@/api.ts";
+import { useStores } from "@/screens/App.tsx";
 
 export class LoginScreenVm {
   constructor(private authStore: AuthStore) {
@@ -27,10 +27,10 @@ export class LoginScreenVm {
       return null;
     }
     if (this.username.length === 0) {
-      return "Username is required";
+      return "Никнейм обязателен";
     }
     if (this.password.length === 0) {
-      return "Password is required";
+      return "Пароль обязателен";
     }
 
     return null;

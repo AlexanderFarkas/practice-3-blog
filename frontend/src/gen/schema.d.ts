@@ -55,6 +55,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/users/{user_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get By Id */
+        get: operations["get_by_id_users__user_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/users/{id}/subscribe": {
         parameters: {
             query?: never;
@@ -140,7 +157,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/posts/{id}": {
+    "/posts/": {
         parameters: {
             query?: never;
             header?: never;
@@ -148,6 +165,24 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
+        put?: never;
+        /** Create Post */
+        post: operations["create_post_posts__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/posts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Post */
+        get: operations["get_post_posts__id__get"];
         /** Update Post */
         put: operations["update_post_posts__id__put"];
         post?: never;
@@ -158,7 +193,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/posts/{id}/share": {
+    "/posts/{post_id}/share": {
         parameters: {
             query?: never;
             header?: never;
@@ -168,24 +203,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Share Post */
-        post: operations["share_post_posts__id__share_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/posts/{id}/unshare": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Unshare Post */
-        post: operations["unshare_post_posts__id__unshare_post"];
+        post: operations["share_post_posts__post_id__share_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -230,7 +248,7 @@ export interface components {
             content: string;
             /**
              * Created At
-             * Format: date
+             * Format: date-time
              */
             created_at: string;
         };
@@ -251,6 +269,11 @@ export interface components {
         };
         /** PostDTO */
         PostDTO: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
             /** Title */
             title: string;
             /** Content */
@@ -263,16 +286,20 @@ export interface components {
             user: components["schemas"]["UserDTO"];
             /**
              * Created At
-             * Format: date
+             * Format: date-time
              */
             created_at: string;
             /**
              * Updated At
-             * Format: date
+             * Format: date-time
              */
             updated_at: string;
             /** Comments */
             comments: components["schemas"]["CommentDTO"][];
+            /** Is Public */
+            is_public: boolean;
+            /** Tags */
+            tags: string[];
         };
         /** PutPostDTO */
         PutPostDTO: {
@@ -282,6 +309,8 @@ export interface components {
             content: string;
             /** Is Public */
             is_public: boolean;
+            /** Tags */
+            tags: string[];
         };
         /** SharePostDTO */
         SharePostDTO: {
@@ -300,6 +329,20 @@ export interface components {
             id: string;
             /** Username */
             username: string;
+        };
+        /** UserWithProfileDTO */
+        UserWithProfileDTO: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Username */
+            username: string;
+            /** Subscribers */
+            subscribers: components["schemas"]["UserDTO"][];
+            /** Subscriptions */
+            subscriptions: components["schemas"]["UserDTO"][];
         };
         /** ValidationError */
         ValidationError: {
@@ -326,6 +369,7 @@ export type SchemaPostDto = components['schemas']['PostDTO'];
 export type SchemaPutPostDto = components['schemas']['PutPostDTO'];
 export type SchemaSharePostDto = components['schemas']['SharePostDTO'];
 export type SchemaUserDto = components['schemas']['UserDTO'];
+export type SchemaUserWithProfileDto = components['schemas']['UserWithProfileDTO'];
 export type SchemaValidationError = components['schemas']['ValidationError'];
 export type $defs = Record<string, never>;
 export interface operations {
@@ -410,7 +454,38 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserDTO"];
+                    "application/json": components["schemas"]["UserWithProfileDTO"];
+                };
+            };
+        };
+    };
+    get_by_id_users__user_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserWithProfileDTO"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -432,7 +507,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserDTO"];
+                    "application/json": components["schemas"]["UserWithProfileDTO"];
                 };
             };
             /** @description Validation Error */
@@ -463,7 +538,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserDTO"];
+                    "application/json": components["schemas"]["UserWithProfileDTO"];
                 };
             };
             /** @description Validation Error */
@@ -548,6 +623,70 @@ export interface operations {
             };
         };
     };
+    create_post_posts__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PutPostDTO"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_post_posts__id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostDTO"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     update_post_posts__id__put: {
         parameters: {
             query?: never;
@@ -614,44 +753,13 @@ export interface operations {
             };
         };
     };
-    share_post_posts__id__share_post: {
+    share_post_posts__post_id__share_post: {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SharePostDTO"];
+            path: {
+                post_id: string;
             };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    unshare_post_posts__id__unshare_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
             cookie?: never;
         };
         requestBody: {

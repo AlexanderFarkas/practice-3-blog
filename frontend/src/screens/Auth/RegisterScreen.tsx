@@ -32,36 +32,36 @@ const RegisterScreenImpl: React.FC<IProps> = observer((props) => {
         vm.isLoading && "pointer-events-none opacity-70",
       )}
     >
-      <TypographyH2 className={"mb-3"}>Register</TypographyH2>
+      <TypographyH2 className={"mb-3"}>Регистрация</TypographyH2>
       <div className={"flex flex-col gap-2"}>
-        <Label htmlFor={"username-field"}>Username</Label>
+        <Label htmlFor={"username-field"}>Никнейм</Label>
         <Input
           type={"email"}
           value={vm.username}
           onChange={(e) => (vm.username = e.target.value)}
           id={"username-field"}
-          placeholder={"Enter your username"}
+          placeholder={"Введите Ваш никнейм"}
         />
       </div>
       <div className={"flex flex-col gap-2"}>
-        <Label htmlFor={"password-field"}>Password</Label>
+        <Label htmlFor={"password-field"}>Пароль</Label>
         <Input
           id={"password-field"}
           value={vm.password}
           onChange={(e) => (vm.password = e.target.value)}
           type={"password"}
-          placeholder={"Enter your password"}
+          placeholder={"Введите Ваш пароль"}
         />
       </div>
       <div className={"flex flex-col gap-2"}>
-        <Label htmlFor={"repeat-password-field"}>Confirm Password</Label>
+        <Label htmlFor={"repeat-password-field"}>Повторите Пароль</Label>
         <Input
           id={"repeat-password-field"}
           value={vm.repeatPassword}
           onChange={(e) => (vm.repeatPassword = e.target.value)}
           autoComplete={"off"}
           type={"password"}
-          placeholder={"Confirm your password"}
+          placeholder={"Повторите Ваш пароль"}
         />
       </div>
       {vm.error != null && <Label className={"text-red-400"}>{vm.error}</Label>}
@@ -72,10 +72,10 @@ const RegisterScreenImpl: React.FC<IProps> = observer((props) => {
           onClick={vm.submit}
           type={"submit"}
         >
-          Register
+          Зарегистрироваться
         </Button>
         <Link className={buttonVariants({ variant: "outline" })} to={"/login"}>
-          Login instead
+          К Авторизации
         </Link>
       </div>
     </PageRoot>

@@ -2,7 +2,7 @@ import uuid
 import datetime
 from fastapi import APIRouter
 from fastapi.params import Depends
-from sqlalchemy import select
+from sqlalchemy import select, true
 from sqlalchemy.orm import Session
 import sqlalchemy as sa
 from backend.src.modules.auth.auth_dependencies import get_user_id
@@ -22,22 +22,26 @@ class PutPostDTO(DTO):
     title: str
     content: str
     is_public: bool
+    tags: list[str]
 
 
 class CommentDTO(DTO):
     user: UserDTO
     content: str
-    created_at: datetime.date
+    created_at: datetime.datetime
 
 
 class PostDTO(DTO):
+    id: uuid.UUID
     title: str
     content: str
     user_id: uuid.UUID
     user: UserDTO
-    created_at: datetime.date
-    updated_at: datetime.date
+    created_at: datetime.datetime
+    updated_at: datetime.datetime
     comments: list[CommentDTO]
+    is_public: bool
+    tags: list[str]
 
 
 @posts_router.get("/all_feed")
@@ -77,10 +81,7 @@ def get_subscriptions_feed(
             .where(
                 user_subscription_table.c.subscriber_id == user_id,
                 Post.user_id == user_subscription_table.c.publisher_id,
-                sa.or_(
-                    Post.is_public,
-                    shared_posts_table.c.user_id == user_id,
-                ),
+                Post.can_be_viewed_by(user_id),
             )
             .order_by(Post.created_at.desc())
         )
@@ -102,10 +103,7 @@ def get_user_posts(
             .outerjoin(shared_posts_table, shared_posts_table.c.post_id == Post.id)
             .where(
                 Post.user_id == publisher_id,
-                sa.or_(
-                    Post.is_public,
-                    shared_posts_table.c.user_id == user_id,
-                ),
+                Post.can_be_viewed_by(user_id) == true(),
             )
         )
         .scalars()
@@ -114,15 +112,18 @@ def get_user_posts(
     return [PostDTO.model_validate(post) for post in posts]
 
 
+@posts_router.post("/")
 def create_post(
     dto: PutPostDTO,
     user_id: uuid.UUID = Depends(get_user_id),
     session: Session = Depends(get_session),
 ):
-    post = Post(
+    post = Post.create(
         user_id=user_id,
         title=dto.title,
         content=dto.content,
+        is_public=dto.is_public,
+        tags=dto.tags,
     )
     session.add(post)
     session.commit()
@@ -143,6 +144,18 @@ def delete_post(
     return PostDTO.model_validate(post)
 
 
+@posts_router.get("/{id}")
+def get_post(
+    id: uuid.UUID,
+    user_id: uuid.UUID = Depends(get_user_id),
+    session: Session = Depends(get_session),
+) -> PostDTO:
+    post: Post = session.get(Post, id)
+    if not post.can_be_viewed_by(user_id):
+        raise DomainException("You can't view this post")
+    return PostDTO.model_validate(post)
+
+
 @posts_router.put("/{id}")
 def update_post(
     id: uuid.UUID,
@@ -157,6 +170,7 @@ def update_post(
     post.title = dto.title
     post.content = dto.content
     post.is_public = dto.is_public
+    post.tags = dto.tags
 
     session.commit()
     return PostDTO.model_validate(post)
@@ -166,30 +180,17 @@ class SharePostDTO(DTO):
     user_id: uuid.UUID
 
 
-@posts_router.post("/{id}/share")
+@posts_router.post("/{post_id}/share")
 def share_post(
+    post_id: str,
     dto: SharePostDTO,
     user_id: uuid.UUID = Depends(get_user_id),
     session: Session = Depends(get_session),
 ) -> None:
-    post = session.get(Post, id)
+    post = session.get(Post, post_id)
     if post.user_id != user_id:
         raise DomainException("You can't share other user's post")
     post.share_with(session.get(User, dto.user_id))
-    session.commit()
-    return None
-
-
-@posts_router.post("/{id}/unshare")
-def unshare_post(
-    dto: SharePostDTO,
-    user_id: uuid.UUID = Depends(get_user_id),
-    session: Session = Depends(get_session),
-) -> None:
-    post = session.get(Post, id)
-    if post.user_id != user_id:
-        raise DomainException("You can't unshare other user's post")
-    post.unshare_with(session.get(User, dto.user_id))
     session.commit()
     return None
 

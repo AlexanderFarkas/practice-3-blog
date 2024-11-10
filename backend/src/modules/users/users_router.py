@@ -26,9 +26,17 @@ class UserWithProfileDTO(UserDTO):
 @users_router.get("/me")
 def get_me(
     user_id: uuid.UUID = Depends(get_user_id), session: Session = Depends(get_session)
-) -> UserDTO:
+) -> UserWithProfileDTO:
     user = session.get(User, user_id)
-    return UserDTO.model_validate(user)
+    return UserWithProfileDTO.model_validate(user)
+
+
+@users_router.get("/{user_id}")
+def get_by_id(
+    user_id: uuid.UUID, session: Session = Depends(get_session)
+) -> UserWithProfileDTO:
+    user = session.get(User, user_id)
+    return UserWithProfileDTO.model_validate(user)
 
 
 @users_router.post("/{id}/subscribe")
@@ -36,11 +44,11 @@ def subscribe(
     id: uuid.UUID,
     my_user_id: uuid.UUID = Depends(get_user_id),
     session: Session = Depends(get_session),
-) -> UserDTO:
+) -> UserWithProfileDTO:
     user: User = session.get(User, my_user_id)
     user.subscribe_to(session.get(User, id))
     session.commit()
-    return UserDTO.model_validate(user)
+    return UserWithProfileDTO.model_validate(user)
 
 
 @users_router.post("/{id}/unsubscribe")
@@ -48,8 +56,8 @@ def unsubscribe(
     id: uuid.UUID,
     my_user_id: uuid.UUID = Depends(get_user_id),
     session: Session = Depends(get_session),
-) -> UserDTO:
+) -> UserWithProfileDTO:
     user: User = session.get(User, my_user_id)
     user.unsubscribe_from(session.get(User, id))
     session.commit()
-    return UserDTO.model_validate(user)
+    return UserWithProfileDTO.model_validate(user)

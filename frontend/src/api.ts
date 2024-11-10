@@ -1,5 +1,6 @@
 import createFetchClient from "openapi-fetch";
 import { paths } from "./gen/schema";
+import { AuthStore } from "@/screens/Stores/AuthStore.ts";
 
 const api = {
   onUnauthorized: () => {},
@@ -33,7 +34,7 @@ api.use({
   async onRequest({ request }) {
     request.headers.set(
       "Authorization",
-      "Bearer " + localStorage.getItem("accessToken"),
+      "Bearer " + localStorage.getItem(AuthStore.ACCESS_TOKEN),
     );
     await new Promise((resolve) => setTimeout(resolve, 1000));
   },

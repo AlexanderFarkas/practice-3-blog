@@ -7,9 +7,9 @@ import {
   observable,
 } from "mobx";
 import { AuthStore } from "@/screens/Stores/AuthStore.ts";
-import { useStores } from "@/main.tsx";
 import { useVm } from "@/lib/utils.ts";
 import { ApiError } from "@/api.ts";
+import { useStores } from "@/screens/App.tsx";
 
 export class RegisterScreenVm {
   constructor(private authStore: AuthStore) {
@@ -28,13 +28,13 @@ export class RegisterScreenVm {
       return null;
     }
     if (this.username.length === 0) {
-      return "Username is required";
+      return "Никнейм обязателен";
     }
     if (this.password.length === 0) {
-      return "Password is required";
+      return "Пароль обязателен";
     }
     if (this.password !== this.repeatPassword) {
-      return "Passwords do not match";
+      return "Пароли должны совпадать";
     }
 
     return null;

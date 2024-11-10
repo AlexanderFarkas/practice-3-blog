@@ -7,8 +7,7 @@ import {
 } from "./MyFeedScreenVm.tsx";
 import { PageRoot } from "@/screens/PageRoot.tsx";
 import { Button } from "@/components/ui/button.tsx";
-import { useStores } from "@/main.tsx";
-import { ExitIcon, PlusIcon } from "@radix-ui/react-icons";
+import { ExitIcon, PersonIcon, PlusIcon } from "@radix-ui/react-icons";
 import { TypographyH2 } from "@/components/typography.tsx";
 import { Separator } from "@/components/ui/separator.tsx";
 import { Card } from "@/components/ui/card.tsx";
@@ -18,6 +17,10 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs.tsx";
+import { Link, useLocation } from "wouter";
+import { useStores } from "@/screens/App.tsx";
+import { PageHeader } from "@/components/PageHeader.tsx";
+import { PostCard } from "@/components/PostCard.tsx";
 
 interface IProps {}
 
@@ -31,24 +34,29 @@ export const MyFeedScreen: React.FC<IProps> = observer((props) => {
 
 const MyFeedScreenImpl: React.FC<IProps> = observer((props) => {
   const authStore = useStores().authStore;
+  const [_, navigate] = useLocation();
   const vm = useMyFeedScreenVm();
   return (
     <PageRoot>
-      <div className={"flex flex-row justify-between w-full"}>
-        <div className={"flex flex-row gap-3"}>
-          <TypographyH2 className={"border-0"}>Feed</TypographyH2>
+      <PageHeader>
+        <div className={"flex items-center flex-row gap-3"}>
+          <div className={"text-3xl font-bold"}>Лента</div>
           <Button
             className={"aspect-square"}
             variant={"outline"}
-            onClick={authStore.logout}
+            onClick={() => navigate("/create_post")}
           >
             <PlusIcon />
           </Button>
+          <Button
+            className={"aspect-square"}
+            variant={"outline"}
+            onClick={() => navigate("/profile/" + authStore.user!.id)}
+          >
+            <PersonIcon />
+          </Button>
         </div>
-        <Button variant={"outline"} onClick={authStore.logout}>
-          <ExitIcon />
-        </Button>
-      </div>
+      </PageHeader>
       <Separator />
 
       <Tabs
@@ -57,27 +65,22 @@ const MyFeedScreenImpl: React.FC<IProps> = observer((props) => {
         onValueChange={(value) => vm.setType(value as FeedType)}
       >
         <TabsList className={"grid w-full grid-cols-2"}>
-          <TabsTrigger value={"all" satisfies FeedType}>All</TabsTrigger>
+          <TabsTrigger value={"all" satisfies FeedType}>Все</TabsTrigger>
           <TabsTrigger value={"subscriptions" satisfies FeedType}>
-            Subscriptions
+            Подписки
           </TabsTrigger>
         </TabsList>
       </Tabs>
 
       {vm.isLoading ? (
-        <div className={"w-full text-center"}>Loading...</div>
+        <div className={"w-full text-center"}>Загрузка...</div>
       ) : (
-        <div>
+        <div className={"flex flex-col gap-3"}>
           {vm.posts.length === 0 && (
-            <div className={"w-full text-center"}>No posts found</div>
+            <div className={"w-full text-center"}>Посты не найдены</div>
           )}
           {vm.posts.map((post) => (
-            <Card>
-              <div>
-                <TypographyH2>{post.title}</TypographyH2>
-                <TypographyH2>{post.content}</TypographyH2>
-              </div>
-            </Card>
+            <PostCard post={post} />
           ))}
         </div>
       )}

@@ -15,7 +15,12 @@ security = HTTPBearer()
 def get_user_id(
     credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
 ) -> uuid.UUID:
-    token_data: dict = jwt.decode(credentials.credentials, JWT_SECRET, JWT_ALGORITHM)
-    if token_data is None or "user_id" not in token_data:
+    try:
+        token_data: dict = jwt.decode(
+            credentials.credentials, JWT_SECRET, JWT_ALGORITHM
+        )
+        if token_data is None or "user_id" not in token_data:
+            raise UnauthorizedException()
+        return uuid.UUID(token_data["user_id"])
+    except jwt.PyJWTError:
         raise UnauthorizedException()
-    return uuid.UUID(token_data["user_id"])

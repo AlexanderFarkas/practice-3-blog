@@ -91,7 +91,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserDTO"
+                  "$ref": "#/components/schemas/UserWithProfileDTO"
                 }
               }
             }
@@ -102,6 +102,51 @@
             "HTTPBearer": []
           }
         ]
+      }
+    },
+    "/users/{user_id}": {
+      "get": {
+        "summary": "Get By Id",
+        "operationId": "get_by_id_users__user_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserWithProfileDTO"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/users/{id}/subscribe": {
@@ -131,7 +176,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserDTO"
+                  "$ref": "#/components/schemas/UserWithProfileDTO"
                 }
               }
             }
@@ -176,7 +221,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserDTO"
+                  "$ref": "#/components/schemas/UserWithProfileDTO"
                 }
               }
             }
@@ -297,6 +342,47 @@
         }
       }
     },
+    "/posts/": {
+      "post": {
+        "summary": "Create Post",
+        "operationId": "create_post_posts__post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutPostDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/posts/{id}": {
       "delete": {
         "summary": "Delete Post",
@@ -324,6 +410,49 @@
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Get Post",
+        "operationId": "get_post_posts__id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostDTO"
+                }
               }
             }
           },
@@ -391,19 +520,35 @@
         }
       }
     },
-    "/posts/{id}/share": {
+    "/posts/{post_id}/share": {
       "post": {
         "summary": "Share Post",
-        "operationId": "share_post_posts__id__share_post",
+        "operationId": "share_post_posts__post_id__share_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "post_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Post Id"
+            }
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/SharePostDTO"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -424,53 +569,7 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
-      }
-    },
-    "/posts/{id}/unshare": {
-      "post": {
-        "summary": "Unshare Post",
-        "operationId": "unshare_post_posts__id__unshare_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SharePostDTO"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
+        }
       }
     },
     "/posts/{post_id}/comment": {
@@ -568,7 +667,7 @@
           },
           "created_at": {
             "type": "string",
-            "format": "date",
+            "format": "date-time",
             "title": "Created At"
           }
         },
@@ -615,6 +714,11 @@
       },
       "PostDTO": {
         "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
           "title": {
             "type": "string",
             "title": "Title"
@@ -633,12 +737,12 @@
           },
           "created_at": {
             "type": "string",
-            "format": "date",
+            "format": "date-time",
             "title": "Created At"
           },
           "updated_at": {
             "type": "string",
-            "format": "date",
+            "format": "date-time",
             "title": "Updated At"
           },
           "comments": {
@@ -647,17 +751,31 @@
             },
             "type": "array",
             "title": "Comments"
+          },
+          "is_public": {
+            "type": "boolean",
+            "title": "Is Public"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags"
           }
         },
         "type": "object",
         "required": [
+          "id",
           "title",
           "content",
           "user_id",
           "user",
           "created_at",
           "updated_at",
-          "comments"
+          "comments",
+          "is_public",
+          "tags"
         ],
         "title": "PostDTO"
       },
@@ -674,13 +792,21 @@
           "is_public": {
             "type": "boolean",
             "title": "Is Public"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags"
           }
         },
         "type": "object",
         "required": [
           "title",
           "content",
-          "is_public"
+          "is_public",
+          "tags"
         ],
         "title": "PutPostDTO"
       },
@@ -716,6 +842,41 @@
           "username"
         ],
         "title": "UserDTO"
+      },
+      "UserWithProfileDTO": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "subscribers": {
+            "items": {
+              "$ref": "#/components/schemas/UserDTO"
+            },
+            "type": "array",
+            "title": "Subscribers"
+          },
+          "subscriptions": {
+            "items": {
+              "$ref": "#/components/schemas/UserDTO"
+            },
+            "type": "array",
+            "title": "Subscriptions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "username",
+          "subscribers",
+          "subscriptions"
+        ],
+        "title": "UserWithProfileDTO"
       },
       "ValidationError": {
         "properties": {
