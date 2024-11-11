@@ -3,6 +3,7 @@ import uuid
 
 import sqlalchemy as sa
 from sqlalchemy import ForeignKey, Column, Table, String
+from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.hybrid import hybrid_method
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -55,7 +56,7 @@ class Post(Base):
         order_by=PostComment.created_at.desc(),
         lazy="selectin",
     )
-    tags: Mapped[list[str]] = mapped_column(sa.ARRAY(String))
+    tags: Mapped[list[str]] = mapped_column(ARRAY(String))
     created_at: Mapped[datetime.datetime] = mapped_column(default_factory=utc_now)
     updated_at: Mapped[datetime.datetime] = mapped_column(
         default_factory=utc_now,

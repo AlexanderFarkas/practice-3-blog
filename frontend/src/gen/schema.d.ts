@@ -554,7 +554,9 @@ export interface operations {
     };
     get_feed_posts_all_feed_get: {
         parameters: {
-            query?: never;
+            query: {
+                tag: string | null;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -570,11 +572,22 @@ export interface operations {
                     "application/json": components["schemas"]["PostDTO"][];
                 };
             };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
         };
     };
     get_subscriptions_feed_posts_subscriptions_feed_get: {
         parameters: {
-            query?: never;
+            query: {
+                tag: string | null;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -588,6 +601,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PostDTO"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

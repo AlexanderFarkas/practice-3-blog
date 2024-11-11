@@ -57,11 +57,11 @@ export const AppImpl = observer(() => {
               <Route path={"/profile/:userId"}>
                 {(params) => <UserProfile userId={params.userId} />}
               </Route>,
-              <Route path={"/"}>
+              <Route path={"/feed"}>
                 <MyFeedScreen />
               </Route>,
               <Route>
-                <Redirect to={"/"} />
+                <Redirect to={"/feed"} />
               </Route>,
             ]
           : [

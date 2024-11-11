@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card.tsx";
 import { TypographyH2 } from "@/components/typography.tsx";
 import { Link } from "wouter";
 import React from "react";
+import { Separator } from "@/components/ui/separator.tsx";
 
 export const PostCard = observer(
   ({ post, trailing }: { post: SchemaPostDto; trailing?: React.ReactNode }) => {
@@ -29,6 +30,22 @@ export const PostCard = observer(
             }
           </TypographyH2>
           <div className={"p-2"}>{post.content}</div>
+          {post.tags.length > 0 && (
+            <>
+              <Separator />
+              <div className={"flex flex-row flex-wrap gap-2 p-2"}>
+                {post.tags.map((tag) => (
+                  <Link
+                    key={tag}
+                    className={"font-bold"}
+                    to={`/feed?tag=${tag}`}
+                  >
+                    #{tag}
+                  </Link>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </Card>
     );

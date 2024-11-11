@@ -21,6 +21,7 @@ import { Link, useLocation } from "wouter";
 import { useStores } from "@/screens/App.tsx";
 import { PageHeader } from "@/components/PageHeader.tsx";
 import { PostCard } from "@/components/PostCard.tsx";
+import { DeleteIcon } from "lucide-react";
 
 interface IProps {}
 
@@ -71,7 +72,18 @@ const MyFeedScreenImpl: React.FC<IProps> = observer((props) => {
           </TabsTrigger>
         </TabsList>
       </Tabs>
-
+      {vm.tag && (
+        <div className={"flex flex-row items-center gap-2"}>
+          Посты по тэгу: #{vm.tag}
+          <Button
+            className={"aspect-square"}
+            variant={"outline"}
+            onClick={() => (vm.tag = null)}
+          >
+            <DeleteIcon />
+          </Button>
+        </div>
+      )}
       {vm.isLoading ? (
         <div className={"w-full text-center"}>Загрузка...</div>
       ) : (

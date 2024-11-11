@@ -1,10 +1,11 @@
 import uuid
 import datetime
+from typing import Optional
+
 from fastapi import APIRouter
 from fastapi.params import Depends
 from sqlalchemy import select, true
 from sqlalchemy.orm import Session
-import sqlalchemy as sa
 from backend.src.modules.auth.auth_dependencies import get_user_id
 from backend.src.modules.auth.auth_models import User, user_subscription_table
 from backend.src.modules.common.dto import DTO
@@ -46,6 +47,7 @@ class PostDTO(DTO):
 
 @posts_router.get("/all_feed")
 def get_feed(
+    tag: Optional[str] = None,
     user_id: uuid.UUID = Depends(get_user_id),
     session: Session = Depends(get_session),
 ) -> list[PostDTO]:
@@ -54,10 +56,8 @@ def get_feed(
             select(Post)
             .outerjoin(shared_posts_table, shared_posts_table.c.post_id == Post.id)
             .where(
-                sa.or_(
-                    Post.is_public,
-                    shared_posts_table.c.user_id == user_id,
-                ),
+                Post.can_be_viewed_by(user_id),
+                Post.tags.contains([tag]) if tag else true(),
             )
             .order_by(Post.created_at.desc())
         )
@@ -69,6 +69,7 @@ def get_feed(
 
 @posts_router.get("/subscriptions_feed")
 def get_subscriptions_feed(
+    tag: Optional[str] = None,
     user_id: uuid.UUID = Depends(get_user_id),
     session: Session = Depends(get_session),
 ) -> list[PostDTO]:
@@ -82,6 +83,7 @@ def get_subscriptions_feed(
                 user_subscription_table.c.subscriber_id == user_id,
                 Post.user_id == user_subscription_table.c.publisher_id,
                 Post.can_be_viewed_by(user_id),
+                Post.tags.contains([tag]) if tag else true(),
             )
             .order_by(Post.created_at.desc())
         )
