@@ -8,9 +8,9 @@ import { useStores } from "@/screens/App.tsx";
 export const PageHeader = ({ children }: { children?: React.ReactNode }) => {
   const [_, navigate] = useLocation();
   const authStore = useStores().authStore;
-  const [match] = useRoute("/");
+  const [match] = useRoute("/feed");
   return (
-    <div className={"flex flex-row justify-between items-center w-full"}>
+    <div className={"flex flex-row justify-between items-center w-full gap-2"}>
       {!match && (
         <Button variant={"outline"} onClick={() => navigate("/")}>
           <HomeIcon />

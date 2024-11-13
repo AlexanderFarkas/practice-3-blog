@@ -22,13 +22,16 @@ shared_posts_table = Table(
 class PostComment(Base):
     __tablename__ = "post_comment"
 
+    id: Mapped[uuid.UUID] = mapped_column(
+        primary_key=True,
+        init=False,
+        default_factory=uuid.uuid4,
+    )
     post_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("post.id", onupdate="CASCADE", ondelete="CASCADE"),
-        primary_key=True,
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("user.id", onupdate="CASCADE", ondelete="CASCADE"),
-        primary_key=True,
     )
     user: Mapped[User] = relationship()
     content: Mapped[str] = mapped_column()
@@ -90,7 +93,9 @@ class Post(Base):
         self.shared_with_users.remove(user)
 
     def add_comment(self, user: User, content: str):
-        self.comments.append(PostComment(user=user, content=content))
+        self.comments.append(
+            PostComment(post_id=self.id, user_id=user.id, user=user, content=content)
+        )
 
     @hybrid_method
     def can_be_viewed_by(self, user_id: uuid.UUID) -> bool:

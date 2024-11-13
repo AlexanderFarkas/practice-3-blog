@@ -48,7 +48,7 @@ const UserProfileImpl: React.FC<IProps> = observer((props) => {
   return (
     <PageRoot>
       <PageHeader>
-        <div className={"text-xl"}>
+        <div className={"text-xl text-center truncate text-ellipsis"}>
           {vm.isLoading ? "..." : `${vm.user!.username} - Посты`}
         </div>
       </PageHeader>

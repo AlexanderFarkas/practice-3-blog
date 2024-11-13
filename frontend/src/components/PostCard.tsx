@@ -1,10 +1,33 @@
-import { SchemaPostDto } from "@/gen/schema";
+import { SchemaCommentDto, SchemaPostDto } from "@/gen/schema";
 import { observer } from "mobx-react-lite";
 import { Card } from "@/components/ui/card.tsx";
 import { TypographyH2 } from "@/components/typography.tsx";
 import { Link } from "wouter";
-import React from "react";
+import React, { useState } from "react";
 import { Separator } from "@/components/ui/separator.tsx";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog.tsx";
+import { Button } from "@/components/ui/button.tsx";
+import { ShareIcon } from "lucide-react";
+import { Label } from "@/components/ui/label.tsx";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select.tsx";
+import { api } from "@/api.ts";
+import { Input } from "@/components/ui/input.tsx";
+import { PlusIcon } from "@radix-ui/react-icons";
+import TimeAgo from "timeago-react";
 
 export const PostCard = observer(
   ({ post, trailing }: { post: SchemaPostDto; trailing?: React.ReactNode }) => {
@@ -30,6 +53,20 @@ export const PostCard = observer(
             }
           </TypographyH2>
           <div className={"p-2"}>{post.content}</div>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button className={"aspect-square m-2"} variant={"outline"}>
+                Комментировать
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Комментарии</DialogTitle>
+              </DialogHeader>
+
+              <CommentsSection post={post} />
+            </DialogContent>
+          </Dialog>
           {post.tags.length > 0 && (
             <>
               <Separator />
@@ -51,3 +88,49 @@ export const PostCard = observer(
     );
   },
 );
+
+const CommentsSection = observer(({ post }: { post: SchemaPostDto }) => {
+  const [content, setContent] = useState("");
+  return (
+    <div className={"flex flex-col gap-3"}>
+      <div className={"max-h-[400px] overflow-y-scroll"}>
+        {post.comments.map((comment) => (
+          <div>
+            <div className={"flex flex-row gap-3"}>
+              <div className={"underline"}>{comment.user.username}</div>
+
+              <TimeAgo datetime={comment.created_at} locale="ru_RU" />
+            </div>
+            <div>{comment.content}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className={"flex flex-row gap-3"}>
+        <Input
+          className={"flex-1"}
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+        />
+        <Button
+          onClick={async () => {
+            const { data } = await api.POST("/posts/{post_id}/comment", {
+              params: {
+                path: {
+                  post_id: post.id,
+                },
+              },
+              body: {
+                content,
+              },
+            });
+            setContent("");
+            post.comments = data!.comments;
+          }}
+        >
+          <PlusIcon />
+        </Button>
+      </div>
+    </div>
+  );
+});

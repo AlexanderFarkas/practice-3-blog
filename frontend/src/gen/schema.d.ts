@@ -554,8 +554,8 @@ export interface operations {
     };
     get_feed_posts_all_feed_get: {
         parameters: {
-            query: {
-                tag: string | null;
+            query?: {
+                tag?: string | null;
             };
             header?: never;
             path?: never;
@@ -585,8 +585,8 @@ export interface operations {
     };
     get_subscriptions_feed_posts_subscriptions_feed_get: {
         parameters: {
-            query: {
-                tag: string | null;
+            query?: {
+                tag?: string | null;
             };
             header?: never;
             path?: never;
